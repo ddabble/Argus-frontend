@@ -1,34 +1,17 @@
 import React from 'react';
 import WeekCalendar from 'react-week-calendar';
-import 'react-week-calendar/dist/style.css';
+import './CalendarView.css';
 import moment from 'moment';
 import Modal from './Modal.js';
+import Event from "./Event";
+import axios from "axios";
 
-export default class TestView extends React.Component {
+export default class CalendarView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      lastUid: 4,
-      selectedIntervals: [
-        {
-          uid: 1,
-          start: moment({ h: 10, m: 5 }),
-          end: moment({ h: 12, m: 5 }),
-          value: 'Booked by Smith'
-        },
-        {
-          uid: 2,
-          start: moment({ h: 13, m: 0 }).add(2, 'd'),
-          end: moment({ h: 13, m: 45 }).add(2, 'd'),
-          value: 'Closed'
-        },
-        {
-          uid: 3,
-          start: moment({ h: 11, m: 0 }),
-          end: moment({ h: 14, m: 0 }),
-          value: 'Reserved by White'
-        }
-      ]
+      lastUid: 0,
+      selectedIntervals: []
     };
   }
 
@@ -50,25 +33,82 @@ export default class TestView extends React.Component {
     );
     if (index > -1) {
       selectedIntervals[index] = event;
+      console.log('here is the event: ', event);
       this.setState({ selectedIntervals });
     }
   };
 
   handleSelect = newIntervals => {
     const { lastUid, selectedIntervals } = this.state;
+    let colorCode = this.colorPicker[this.colorIndex];
+    this.colorIndex+=1;
+    for (let i = 0; i < selectedIntervals.length; i++) {
+      if (selectedIntervals[i].value === newIntervals[0].value) {
+        colorCode = selectedIntervals[i].color;
+        this.colorIndex-=1;
+        break
+      }
+    }
     const intervals = newIntervals.map((interval, index) => {
       return {
         ...interval,
-        uid: lastUid + index
+        uid: lastUid + index,
+        color: colorCode
       };
     });
 
+    console.log(intervals[0]);
+    this.postNotificationProfile(intervals[0].value, intervals[0].start.format(), intervals[intervals.length-1].end.format(), intervals[0].color);
     this.setState({
       selectedIntervals: selectedIntervals.concat(intervals),
       lastUid: lastUid + newIntervals.length
     });
-    console.log(selectedIntervals, lastUid);
   };
+
+  postNotificationProfile = async (name, start, stop, color) => {
+    await axios({
+      url: 'http://localhost:8000/notificationprofiles/',
+      method: 'POST',
+      headers: {
+        Authorization: 'Token ' + localStorage.getItem('token'),
+        'content-type': 'application/json'
+      },
+      data: `{
+        "name": "${name}",
+        "interval_start": "${start}",
+        "interval_stop": "${stop}",
+        "color": "${color}"
+      }`
+    }).then((response) => {
+      return response.data;
+    });
+  };
+
+  colorIndex = 0;
+
+  colorPicker = [
+    '#1abc9c',
+    '#2ecc71',
+    '#3498db',
+    '#9b59b6',
+    '#34495e',
+    '#f1c40f',
+    '#e67e22',
+    '#e74c3c',
+    '#ecf0f1',
+    '#95a5a6',
+    '#16a085',
+    '#27ae60',
+    '#2980b9',
+    '#8e44ad',
+    '#2c3e50',
+    '#f39c12',
+    '#d35400',
+    '#c0392b',
+    '#bdc3c7',
+    '#7f8c8d'
+  ];
+
 
   render() {
     return (
@@ -80,6 +120,7 @@ export default class TestView extends React.Component {
         dayFormat={'ddd'}
         scaleUnit={60}
         modalComponent={Modal}
+        eventComponent={Event}
         firstDay={moment('2019-10-21')}
         selectedIntervals={this.state.selectedIntervals}
         onIntervalSelect={this.handleSelect}

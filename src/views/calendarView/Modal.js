@@ -46,7 +46,7 @@ class Modal extends React.Component {
           }}
           className='customModal__input'
           type='text'
-          placeholder='Enter something'
+          placeholder='Name the time slot'
           defaultValue={value}
         />
         <button className='customModal__button' onClick={this.handleRemove}>
