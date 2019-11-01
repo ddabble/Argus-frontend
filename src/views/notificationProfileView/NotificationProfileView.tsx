@@ -4,7 +4,7 @@ import Header from '../../components/header/Header';
 import { withRouter } from 'react-router-dom';
 import CalendarScheduler from '../../components/scheduler/CalendarScheduler';
 import ActiveProfile from '../../components/active-profiles/ActiveProfile';
-import CalendarView from "../calendarView/CalendarView";
+import CalendarView from '../calendarView/CalendarView';
 import axios from 'axios';
 import moment from 'moment';
 
@@ -25,6 +25,8 @@ const NotificationProfileView: React.FC<PropType> = props => {
     fetchProfiles();
   }, []);
 
+  console.log('dette får vi i viewet:', notificationProfiles);
+
   const fetchProfiles = async () => {
     await axios({
       url: 'http://localhost:8000/notificationprofiles/',
@@ -33,36 +35,34 @@ const NotificationProfileView: React.FC<PropType> = props => {
         Authorization: 'Token ' + localStorage.getItem('token')
       }
     }).then((response: any) => {
-      const data = response.data;
-      const profilesList = serializeDataList(data);
-      setNotificationProfiles(data);
+      setNotificationProfiles(response.data);
     });
   };
   // Helper function: Format JSON from API
   const serializeDataList = (dataFromAPI: any) => {
     const profilesList: any = [];
     for (let i = 0; i < dataFromAPI.length; i++) {
-      let object = serializeData(dataFromAPI[i]);
+      const object = serializeData(dataFromAPI[i]);
       profilesList.push(object);
     }
     return profilesList;
   };
 
   function serializeData(datapoint: any) {
-    let startDate = moment(datapoint.interval_start)
+    const startDate = moment(datapoint.interval_start)
       .format('YYYY MM DD HH mm')
       .split(' ')
       .map(function(item) {
         return parseInt(item, 10);
       });
-    let endDate = moment(datapoint.interval_stop)
+    const endDate = moment(datapoint.interval_stop)
       .format('YYYY MM DD HH mm')
       .split(' ')
       .map(function(item) {
         return parseInt(item, 10);
       });
     //Creating a javascript object to fit the mapping of rendered items
-    let object = {
+    const object = {
       id: datapoint.pk,
       title: datapoint.name,
       startDate: new Date(

@@ -7,7 +7,7 @@ import './variables.css';
 import './colorscheme.css';
 import NotificationProfileView from './views/notificationProfileView/NotificationProfileView';
 import ActiveProfile from './components/active-profiles/ActiveProfile';
-import CalendarView from './views/calendarView/CalendarView.js';
+import CalendarView from './views/calendarView/CalendarView';
 const App: React.SFC = () => {
   return (
     <div>
