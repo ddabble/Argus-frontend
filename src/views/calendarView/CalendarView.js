@@ -11,8 +11,18 @@ export default class CalendarView extends React.Component {
     super(props);
     this.state = {
       lastUid: 0,
-      selectedIntervals: []
+      selectedIntervals: this.props.notificationProfiles
     };
+  }
+
+  componentWillReceiveProps(nextProps, nextContext) {
+    this.setState({selectedIntervals: this.props.notificationProfiles})
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.notificationProfiles !== prevProps.notificationProfiles) {
+      this.setState(this.props.notificationProfiles)
+    }
   }
 
   handleEventRemove = event => {
@@ -21,6 +31,8 @@ export default class CalendarView extends React.Component {
       interval => interval.uid === event.uid
     );
     if (index > -1) {
+      console.log(event);
+      //this.deleteProfile(event);
       selectedIntervals.splice(index, 1);
       this.setState({ selectedIntervals });
     }
@@ -53,19 +65,37 @@ export default class CalendarView extends React.Component {
       return {
         ...interval,
         uid: lastUid + index,
-        color: colorCode
+        color: colorCode,
+        id: ''
       };
     });
 
-    console.log(intervals[0]);
-    this.postNotificationProfile(intervals[0].value, intervals[0].start.format(), intervals[intervals.length-1].end.format(), intervals[0].color);
-    this.setState({
-      selectedIntervals: selectedIntervals.concat(intervals),
-      lastUid: lastUid + newIntervals.length
+    // this.setState({
+    //   selectedIntervals: selectedIntervals.concat(intervals),
+    //   lastUid: lastUid + newIntervals.length
+    // });
+    this.intervalPoster(intervals)
+
+  };
+
+  deleteProfile = async (item) => {
+    await axios({
+      url: 'http://localhost:8000/notificationprofiles/' + item.id,
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Token ' + localStorage.getItem('token')
+      }
+    }).then((response) => {
     });
   };
 
-  postNotificationProfile = async (name, start, stop, color) => {
+  intervalPoster(intervals) {
+    for(let i=0;i<intervals.length;i++) {
+      this.postNotificationProfile(intervals[i].value, intervals[i].start.format(), intervals[i].end.format());
+    }
+  };
+
+  postNotificationProfile = async (name, start, stop) => {
     await axios({
       url: 'http://localhost:8000/notificationprofiles/',
       method: 'POST',
@@ -76,12 +106,10 @@ export default class CalendarView extends React.Component {
       data: `{
         "name": "${name}",
         "interval_start": "${start}",
-        "interval_stop": "${stop}",
-        "color": "${color}"
+        "interval_stop": "${stop}"  
       }`
-    }).then((response) => {
-      return response.data;
-    });
+    })
+      .then(this.props.addElement())
   };
 
   colorIndex = 0;
@@ -111,6 +139,7 @@ export default class CalendarView extends React.Component {
 
 
   render() {
+    const { selectedIntervals } = this.state;
     return (
       <WeekCalendar
         startTime={moment({ h: 0, m: 0 })}
@@ -121,8 +150,8 @@ export default class CalendarView extends React.Component {
         scaleUnit={60}
         modalComponent={Modal}
         eventComponent={Event}
-        firstDay={moment('2019-10-21')}
-        selectedIntervals={this.state.selectedIntervals}
+        firstDay={moment('2019-07-01')}
+        selectedIntervals={this.props.notificationProfiles}
         onIntervalSelect={this.handleSelect}
         onIntervalUpdate={this.handleEventUpdate}
         onIntervalRemove={this.handleEventRemove}

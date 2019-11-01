@@ -19,7 +19,7 @@ const App: React.SFC = () => {
         />
         <Route path='/login' component={LoginView} />
         <Route path='/profile' component={ActiveProfile} />
-        <Route path='/calanderView' component={CalendarView} />
+        <Route path='/calendarView' component={CalendarView} />
         <Route path='*' component={() => <h1>404 not found</h1>} />
       </Switch>
     </div>

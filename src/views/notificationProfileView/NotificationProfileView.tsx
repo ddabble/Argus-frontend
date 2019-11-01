@@ -4,6 +4,7 @@ import Header from '../../components/header/Header';
 import { withRouter } from 'react-router-dom';
 import CalendarScheduler from '../../components/scheduler/CalendarScheduler';
 import ActiveProfile from '../../components/active-profiles/ActiveProfile';
+import CalendarView from "../calendarView/CalendarView";
 import axios from 'axios';
 import moment from 'moment';
 
@@ -23,6 +24,7 @@ const NotificationProfileView: React.FC<PropType> = props => {
   useEffect(() => {
     fetchProfiles();
   }, []);
+
   const fetchProfiles = async () => {
     await axios({
       url: 'http://localhost:8000/notificationprofiles/',
@@ -33,7 +35,7 @@ const NotificationProfileView: React.FC<PropType> = props => {
     }).then((response: any) => {
       const data = response.data;
       const profilesList = serializeDataList(data);
-      setNotificationProfiles(profilesList);
+      setNotificationProfiles(data);
     });
   };
   // Helper function: Format JSON from API
@@ -90,16 +92,20 @@ const NotificationProfileView: React.FC<PropType> = props => {
   return (
     <div className='notification-container'>
       <Header />
-      <h1>My Active Notification Profiles</h1>
-      <ActiveProfile
-        notificationProfiles={notificationProfiles}
-        removeItem={removeItem}
-      />
+      <h1>My Notification Profiles</h1>
+      {/*<ActiveProfile*/}
+      {/*  notificationProfiles={notificationProfiles}*/}
+      {/*  removeItem={removeItem}*/}
+      {/*/>*/}
       <div className='calendar'>
-        <CalendarScheduler
-          notificationProfiles={notificationProfiles}
+        <CalendarView
           addElement={addElement}
+          notificationProfiles={notificationProfiles}
         />
+        {/*<CalendarScheduler*/}
+        {/*  notificationProfiles={notificationProfiles}*/}
+        {/*  addElement={addElement}*/}
+        {/*/>*/}
       </div>
     </div>
   );
